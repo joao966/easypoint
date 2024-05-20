@@ -6,7 +6,16 @@ import { configService } from './config/config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.enableCors();
+
+  const options = {
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204,
+    "credentials":true
+}
+
+  app.enableCors(options);
 
   if (!configService.isProduction()) {
     const config = new DocumentBuilder()

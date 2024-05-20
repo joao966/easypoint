@@ -1,0 +1,141 @@
+import React, { useEffect, useState } from 'react';
+import { Formik } from 'formik';
+import * as yup from 'yup';
+
+// @mui material components
+import Grid from '@mui/material/Grid';
+
+// Soft UI Dashboard React components
+import SuiBox from 'components/SuiBox';
+import SuiButton from 'components/SuiButton';
+
+import { useNavigate } from 'react-router-dom';
+
+import createYupSchema from 'utils/createYupSchema';
+
+import { formatCurrency } from 'utils/mask';
+
+// Custom components
+import HeaderTitle from './headerTitle';
+import FormSection from './formSection';
+
+// Custom styles for the Form
+import { formGrid } from '../styles/form';
+
+const FormBody = ({ formData, dataBaseInfo, saveFunc, formType, requestsData }) => {
+  const [inputs, setInputs] = useState(null);
+  const [validateSchema, setValidateSchema] = useState();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const inputs = {};
+    let schema = createYupSchema({}, {});
+
+    formData.sections.forEach((section) => {
+      section.fields.forEach((input) => {
+        inputs[input.name] = dataBaseInfo[input.name] || input.defaultValue || '';
+        if (input.validationEdit && Object.keys(dataBaseInfo).length > 0) {
+          schema = createYupSchema(schema, {
+            id: input.name,
+            validationType: input.type == 'number' ? 'number' : 'string',
+            validations: input.validationEdit,
+          });
+        } else if (Object.keys(input).length > 0 && input.type == 'select') {
+          schema = createYupSchema(schema, {
+            id: input.name,
+            validationType: 'string',
+            validations: input.validation,
+          });
+        } else if (Object.keys(input).length > 0) {
+          schema = createYupSchema(schema, {
+            id: input.name,
+            validationType: input.type == 'number' ? 'number' : 'string',
+            validations: input.validation,
+          });
+        }
+      });
+    });
+
+    setValidateSchema(yup.object().shape(schema));
+    setInputs(inputs);
+  }, [formData, dataBaseInfo]);
+
+  return inputs ? (
+    <Formik
+      enableReinitialize={true}
+      initialValues={inputs}
+      validationSchema={validateSchema}
+      onSubmit={(values, { setSubmitting }) => {
+        const valor = values['valor_total'];
+        values['valor_total'] = formatCurrency(valor);
+        saveFunc(values)
+          .then((data) => {
+            navigate(-1);
+          })
+          .catch((err) => {
+            values['valor_total'] = valor;
+            setSubmitting(false);
+          });
+      }}
+      key={'formik' + formData.id}
+    >
+      {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setFieldTouched }) =>
+        formData ? (
+          <SuiBox key={'SuiBox' + formData.id}>
+            <HeaderTitle title={formData.title} type={1} key={'headerTitle' + formData.id} />
+            {formData.sections.length > 0 ? (
+              <SuiBox component="form" role="form" key={formData.id} onSubmit={handleSubmit}>
+                <FormSection
+                  sections={formData.sections}
+                  formik={{
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldTouched,
+                  }}
+                  requestsData={requestsData}
+                  key={'formSection' + formData.id}
+                />
+                {formData.buttons.length > 0 ? (
+                  <Grid
+                    sx={() => formGrid()}
+                    container
+                    rowSpacing={1}
+                    columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+                    key={'buttonGrid' + formData.id}
+                  >
+                    {formData.buttons.map((e) => (
+                      <Grid item key={'buttonGrid_' + e.id}>
+                        <SuiButton
+                          type="submit"
+                          disabled={isSubmitting}
+                          color={e.type}
+                          key={'button_' + e.id}
+                        >
+                          {e.label}
+                        </SuiButton>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <></>
+                )}
+              </SuiBox>
+            ) : (
+              <></>
+            )}
+          </SuiBox>
+        ) : (
+          <></>
+        )
+      }
+    </Formik>
+  ) : (
+    <></>
+  );
+};
+
+export default FormBody;

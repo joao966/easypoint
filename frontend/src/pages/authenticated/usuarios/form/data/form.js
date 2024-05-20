@@ -69,8 +69,8 @@ export default {
         },
         {
           id: '14', //Id unico do elemento
-          label: 'Celular', //Label que vai aparecer
-          name: 'celular', //Nome do campo no banco de dados
+          label: 'phone', //Label que vai aparecer
+          name: 'phone', //Nome do campo no banco de dados
           type: 'mask', //Tipo do input
           defaultValue: '', //Valor inicial do campo
           editable: true, // Boolean se é editavel ou não

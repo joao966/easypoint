@@ -31,8 +31,8 @@ function Form(props) {
         for (let index in values) {
           if (index == 'password' && values[index]) {
             mapObject['senha'] = values[index];
-          } else if (index == 'celular' && values[index]) {
-            mapObject['celular'] = removeSpecialCharacter(values[index]);
+          } else if (index == 'phone' && values[index]) {
+            mapObject['phone'] = removeSpecialCharacter(values[index]);
           } else if (index == 'localidade' && values[index]) {
             mapObject['cidade'] = values[index];
           } else if (index == 'uf' && values[index]) {
@@ -60,7 +60,7 @@ function Form(props) {
           nome: values.nome,
           email: values.email,
           senha: values.password,
-          celular: removeSpecialCharacter(values.celular),
+          phone: removeSpecialCharacter(values.phone),
           cpf: removeSpecialCharacter(values.cpf),
           cep: removeSpecialCharacter(values.cep),
           logradouro: values.logradouro,
